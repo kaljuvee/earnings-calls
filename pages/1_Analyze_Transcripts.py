@@ -187,33 +187,70 @@ with tab1:
                         st.markdown("## 🎯 Predictive Signals")
                         st.markdown(results.get('predictive_signals', ''))
                     
-                    # Save results
-                    results_dir = "test-results"
-                    os.makedirs(results_dir, exist_ok=True)
+                    # Save results in both JSON and MD formats
+                    analyses_dir = "analyses"
+                    os.makedirs(analyses_dir, exist_ok=True)
                     
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    result_file = f"{ticker}_Q{quarter}_{year}_analysis_{timestamp}.json"
-                    result_path = os.path.join(results_dir, result_file)
+                    base_filename = f"{ticker}_Q{quarter}_{year}_agentic_{timestamp}"
                     
-                    with open(result_path, 'w', encoding='utf-8') as f:
-                        json.dump({
-                            'ticker': ticker,
-                            'quarter': quarter,
-                            'year': year,
-                            'timestamp': timestamp,
-                            'provider': llm_provider,
-                            'results': results
-                        }, f, indent=2)
+                    # Prepare full report markdown
+                    full_report = results.get('final_report', '')
+                    if not full_report:
+                        # Combine all sections if final_report not available
+                        full_report = results.get('main_analysis', '')
+                        if include_sentiment and results.get('sentiment_analysis'):
+                            full_report += "\n\n---\n\n## 😊 Sentiment Analysis\n\n" + results.get('sentiment_analysis', '')
+                        if include_predictions and results.get('predictive_signals'):
+                            full_report += "\n\n---\n\n## 🎯 Predictive Signals\n\n" + results.get('predictive_signals', '')
                     
-                    st.success(f"💾 Results saved to: {result_path}")
+                    # Save as Markdown
+                    md_file = f"{base_filename}.md"
+                    md_path = os.path.join(analyses_dir, md_file)
+                    with open(md_path, 'w', encoding='utf-8') as f:
+                        f.write(full_report)
                     
-                    # Download button
-                    st.download_button(
-                        label="📥 Download Full Report",
-                        data=results.get('final_report', ''),
-                        file_name=f"{ticker}_Q{quarter}_{year}_report.md",
-                        mime="text/markdown"
-                    )
+                    # Save as JSON with metadata
+                    json_file = f"{base_filename}.json"
+                    json_path = os.path.join(analyses_dir, json_file)
+                    analysis_data = {
+                        'ticker': ticker,
+                        'quarter': quarter,
+                        'year': year,
+                        'company_name': ticker,
+                        'timestamp': timestamp,
+                        'provider': llm_provider,
+                        'model': model if llm_provider == "openai" else None,
+                        'analysis_type': 'Agentic Workflow',
+                        'results': results,
+                        'full_report_markdown': full_report,
+                        'financial_context_included': include_financial_context,
+                        'sentiment_included': include_sentiment,
+                        'predictions_included': include_predictions
+                    }
+                    with open(json_path, 'w', encoding='utf-8') as f:
+                        json.dump(analysis_data, f, indent=2)
+                    
+                    st.success(f"💾 Results saved to: `{md_path}` and `{json_path}`")
+                    
+                    # Download buttons
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.download_button(
+                            label="📥 Download Markdown",
+                            data=full_report,
+                            file_name=f"{ticker}_Q{quarter}_{year}_report.md",
+                            mime="text/markdown",
+                            use_container_width=True
+                        )
+                    with col2:
+                        st.download_button(
+                            label="📥 Download JSON",
+                            data=json.dumps(analysis_data, indent=2),
+                            file_name=f"{ticker}_Q{quarter}_{year}_report.json",
+                            mime="application/json",
+                            use_container_width=True
+                        )
                     
                 except Exception as e:
                     st.error(f"❌ Analysis failed: {str(e)}")
@@ -237,26 +274,57 @@ with tab1:
                     st.success("✅ Analysis complete!")
                     st.markdown(analysis)
                     
-                    # Save results
-                    results_dir = "test-results"
-                    os.makedirs(results_dir, exist_ok=True)
+                    # Save results in both JSON and MD formats
+                    analyses_dir = "analyses"
+                    os.makedirs(analyses_dir, exist_ok=True)
                     
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    result_file = f"{ticker}_Q{quarter}_{year}_analysis_{timestamp}.md"
-                    result_path = os.path.join(results_dir, result_file)
+                    base_filename = f"{ticker}_Q{quarter}_{year}_{timestamp}"
                     
-                    with open(result_path, 'w', encoding='utf-8') as f:
+                    # Save as Markdown
+                    md_file = f"{base_filename}.md"
+                    md_path = os.path.join(analyses_dir, md_file)
+                    with open(md_path, 'w', encoding='utf-8') as f:
                         f.write(analysis)
                     
-                    st.success(f"💾 Results saved to: {result_path}")
+                    # Save as JSON with metadata
+                    json_file = f"{base_filename}.json"
+                    json_path = os.path.join(analyses_dir, json_file)
+                    analysis_data = {
+                        "ticker": ticker,
+                        "quarter": quarter,
+                        "year": year,
+                        "company_name": ticker,
+                        "timestamp": timestamp,
+                        "provider": llm_provider,
+                        "model": model if llm_provider == "openai" else None,
+                        "analysis_type": "Standard Analysis",
+                        "analysis_markdown": analysis,
+                        "financial_context_included": include_financial_context
+                    }
+                    with open(json_path, 'w', encoding='utf-8') as f:
+                        json.dump(analysis_data, f, indent=2)
                     
-                    # Download button
-                    st.download_button(
-                        label="📥 Download Analysis",
-                        data=analysis,
-                        file_name=f"{ticker}_Q{quarter}_{year}_analysis.md",
-                        mime="text/markdown"
-                    )
+                    st.success(f"💾 Results saved to: `{md_path}` and `{json_path}`")
+                    
+                    # Download buttons
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.download_button(
+                            label="📥 Download Markdown",
+                            data=analysis,
+                            file_name=f"{ticker}_Q{quarter}_{year}_analysis.md",
+                            mime="text/markdown",
+                            use_container_width=True
+                        )
+                    with col2:
+                        st.download_button(
+                            label="📥 Download JSON",
+                            data=json.dumps(analysis_data, indent=2),
+                            file_name=f"{ticker}_Q{quarter}_{year}_analysis.json",
+                            mime="application/json",
+                            use_container_width=True
+                        )
                     
                 except Exception as e:
                     st.error(f"❌ Analysis failed: {str(e)}")

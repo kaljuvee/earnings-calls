@@ -43,3 +43,6 @@ test-results/*.json
 # Transcripts (optional - uncomment if you don't want to commit transcripts)
 # transcripts/*.txt
 # transcripts/*.md
+
+# Analysis output files
+analyses/
