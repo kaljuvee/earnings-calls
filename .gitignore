@@ -46,3 +46,6 @@ test-results/*.json
 
 # Analysis output files
 analyses/
+
+# Database files
+data/

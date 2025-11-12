@@ -48,6 +48,36 @@ Please provide a detailed analysis following this exact structure:
 
 ---
 
+## 📊 𝗣𝗿𝗶𝗰𝗲 𝗠𝗼𝘃𝗲𝗺𝗲𝗻𝘁 𝗦𝗰𝗼𝗿𝗲
+
+**Score: [X]/5**
+
+[Provide a score from -5 to +5 indicating expected stock price movement following this earnings call]
+
+**Scoring Rules:**
+- **+5**: Exceptional results with multiple strong catalysts; significantly exceeded expectations across all key metrics; raised guidance substantially; major positive strategic announcements; expect >10% upward price movement
+- **+4**: Very strong results; beat on most key metrics; positive guidance revision; strong growth drivers; expect 7-10% upward movement
+- **+3**: Solid beat; exceeded expectations on key metrics; maintained or slightly raised guidance; positive momentum; expect 4-7% upward movement
+- **+2**: Modest beat; met or slightly exceeded expectations; stable outlook; some positive signals; expect 2-4% upward movement
+- **+1**: Mixed results with slight positive bias; met expectations; neutral guidance; expect 0-2% upward movement
+- **0**: In-line results; met expectations across the board; no major surprises; neutral guidance; expect minimal price movement (-1% to +1%)
+- **-1**: Slight miss or concerns; met most but missed on 1-2 key metrics; cautious guidance; expect 0-2% downward movement
+- **-2**: Modest miss; missed expectations on several metrics; lowered guidance slightly; emerging concerns; expect 2-4% downward movement
+- **-3**: Clear miss; significantly missed on key metrics; reduced guidance; multiple concerns; negative momentum; expect 4-7% downward movement
+- **-4**: Major miss; missed badly on most metrics; cut guidance substantially; serious operational issues; expect 7-10% downward movement
+- **-5**: Catastrophic results; massive misses across all metrics; slashed guidance; existential concerns; major negative surprises; expect >10% downward movement
+
+**Justification:**
+[2-3 sentences explaining the score based on:
+- Magnitude of earnings beat/miss vs expectations
+- Guidance changes (raised, maintained, lowered)
+- Margin trends and profitability trajectory
+- Growth momentum and market share dynamics
+- Strategic developments and competitive positioning
+- Management tone and confidence level]
+
+---
+
 ## 𝗧𝗵𝗲𝗺𝗲𝘀, 𝗗𝗿𝗶𝘃𝗲𝗿𝘀, 𝗮𝗻𝗱 𝗖𝗼𝗻𝗰𝗲𝗿𝗻𝘀
 
 [Identify 4-6 key themes. For each theme, use an emoji indicator and format as follows:]
@@ -132,22 +162,6 @@ Compare the analyst estimates with the actual results and provide:
 4. **Market Implications**: Based on the magnitude and direction of surprises, what might be the likely market reaction?
 
 Format your response as a structured analysis with clear sections and specific numbers.
-"""
-
-SENTIMENT_ANALYSIS_TEMPLATE = """
-Analyze the sentiment and tone of this earnings call transcript.
-
-**Transcript:**
-{transcript}
-
-Provide:
-1. **Overall Sentiment Score** (1-10, where 1 is very negative and 10 is very positive)
-2. **Management Confidence Level** (Low/Medium/High)
-3. **Key Sentiment Indicators**: Specific phrases or statements that reveal sentiment
-4. **Tone Shifts**: Any notable changes in tone during the call
-5. **Forward-Looking Sentiment**: How optimistic or cautious is management about the future?
-
-Be specific and quote relevant passages to support your assessment.
 """
 
 PREDICTIVE_SIGNAL_TEMPLATE = """

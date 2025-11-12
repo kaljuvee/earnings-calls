@@ -73,7 +73,6 @@ with st.sidebar:
     
     st.header("📊 Analysis Options")
     
-    include_sentiment = st.checkbox("Include Sentiment Analysis", value=True)
     include_predictions = st.checkbox("Include Predictive Signals", value=True)
     include_financial_context = st.checkbox("Include Financial Context", value=True)
     
@@ -175,12 +174,6 @@ with tab1:
                     st.markdown("## 📊 Main Analysis")
                     st.markdown(results.get('main_analysis', 'No analysis available'))
                     
-                    # Sentiment analysis
-                    if include_sentiment and results.get('sentiment_analysis'):
-                        st.markdown("---")
-                        st.markdown("## 😊 Sentiment Analysis")
-                        st.markdown(results.get('sentiment_analysis', ''))
-                    
                     # Predictive signals
                     if include_predictions and results.get('predictive_signals'):
                         st.markdown("---")
@@ -199,8 +192,6 @@ with tab1:
                     if not full_report:
                         # Combine all sections if final_report not available
                         full_report = results.get('main_analysis', '')
-                        if include_sentiment and results.get('sentiment_analysis'):
-                            full_report += "\n\n---\n\n## 😊 Sentiment Analysis\n\n" + results.get('sentiment_analysis', '')
                         if include_predictions and results.get('predictive_signals'):
                             full_report += "\n\n---\n\n## 🎯 Predictive Signals\n\n" + results.get('predictive_signals', '')
                     
@@ -225,7 +216,6 @@ with tab1:
                         'results': results,
                         'full_report_markdown': full_report,
                         'financial_context_included': include_financial_context,
-                        'sentiment_included': include_sentiment,
                         'predictions_included': include_predictions
                     }
                     with open(json_path, 'w', encoding='utf-8') as f:
@@ -272,6 +262,42 @@ with tab1:
                     )
                     
                     st.success("✅ Analysis complete!")
+                    
+                    # Extract score from analysis
+                    from utils.score_extractor import extract_score_from_analysis, get_score_label, get_expected_movement_range
+                    score, score_justification = extract_score_from_analysis(analysis)
+                    
+                    # Display score prominently
+                    if score is not None:
+                        col1, col2, col3 = st.columns(3)
+                        with col1:
+                            st.metric("Score", f"{score}/5", delta=get_score_label(score))
+                        with col2:
+                            st.metric("Expected Movement", get_expected_movement_range(score))
+                        with col3:
+                            # Save to database
+                            from utils.db_util import DatabaseUtil
+                            from datetime import date
+                            db = DatabaseUtil()
+                            try:
+                                # Use current date as earnings date (should be updated with actual date)
+                                earnings_date = date.today()
+                                db.insert_score(
+                                    ticker=ticker,
+                                    quarter=quarter,
+                                    year=year,
+                                    earnings_date=earnings_date,
+                                    score=score,
+                                    score_justification=score_justification or "No justification provided",
+                                    provider=llm_provider,
+                                    model=model if llm_provider == "openai" else None,
+                                    analysis_type="Standard Analysis"
+                                )
+                                st.success("💾 Saved to DB")
+                            except Exception as e:
+                                st.warning(f"⚠️ DB save failed: {str(e)}")
+                    
+                    st.markdown("---")
                     st.markdown(analysis)
                     
                     # Save results in both JSON and MD formats
@@ -300,7 +326,9 @@ with tab1:
                         "model": model if llm_provider == "openai" else None,
                         "analysis_type": "Standard Analysis",
                         "analysis_markdown": analysis,
-                        "financial_context_included": include_financial_context
+                        "financial_context_included": include_financial_context,
+                        "score": score,
+                        "score_justification": score_justification
                     }
                     with open(json_path, 'w', encoding='utf-8') as f:
                         json.dump(analysis_data, f, indent=2)

@@ -7,3 +7,4 @@ Collecting usage statistics. To deactivate, set browser.gatherUsageStats to fals
 
   URL: http://0.0.0.0:8501
 
+2025-11-12 12:56:26.291 Session with id 734528ea-1d8c-4ce2-87a8-d148ca522a0c is already connected! Connecting to a new session.

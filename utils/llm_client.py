@@ -108,30 +108,7 @@ class LLMClient:
         
         return result.content
     
-    def analyze_sentiment(self, transcript: str) -> str:
-        """
-        Analyze sentiment and tone of the transcript
-        
-        Args:
-            transcript: Full transcript text
-            
-        Returns:
-            Sentiment analysis
-        """
-        from prompts.analysis_prompt import SENTIMENT_ANALYSIS_TEMPLATE
-        
-        prompt = PromptTemplate(
-            input_variables=["transcript"],
-            template=SENTIMENT_ANALYSIS_TEMPLATE
-        )
-        
-        chain = prompt | self.llm
-        
-        result = chain.invoke({
-            "transcript": transcript[:30000]
-        })
-        
-        return result.content
+
     
     def compare_estimates_vs_actual(self, ticker: str, quarter: int, year: int,
                                    estimates: str, actual_results: str) -> str:
