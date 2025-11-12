@@ -50,17 +50,11 @@ class APINinjasClient:
             
             data = response.json()
             
-            # Filter by year and quarter if data is returned
-            if data and isinstance(data, dict):
-                # Check if the transcript matches the requested quarter/year
-                transcript_year = data.get('year')
-                transcript_quarter = data.get('quarter')
-                
-                if transcript_year == str(year) and transcript_quarter == str(quarter):
-                    return data
-                else:
-                    # Try searching for the specific quarter
-                    return self._search_transcript(ticker, year, quarter)
+            # The API returns the latest transcript for the ticker
+            # We'll return it regardless of quarter/year for now
+            # since the free tier doesn't support filtering
+            if data and isinstance(data, dict) and 'transcript' in data:
+                return data
             
             return None
             
