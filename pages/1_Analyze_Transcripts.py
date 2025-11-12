@@ -25,11 +25,12 @@ st.title("🤖 Analyze Earnings Call Transcripts")
 st.markdown("AI-powered analysis using LangChain and LangGraph")
 
 # Check API keys
+openai_key = os.getenv("OPENAI_API_KEY")
 xai_key = os.getenv("XAI_API_KEY")
 google_key = os.getenv("GOOGLE_API_KEY")
 
-if not xai_key and not google_key:
-    st.error("❌ No LLM API keys configured. Please set XAI_API_KEY or GOOGLE_API_KEY in .env file")
+if not openai_key and not xai_key and not google_key:
+    st.error("❌ No LLM API keys configured. Please set OPENAI_API_KEY, XAI_API_KEY, or GOOGLE_API_KEY in .env file")
     st.stop()
 
 # Sidebar settings
@@ -38,6 +39,8 @@ with st.sidebar:
     
     # LLM provider selection
     available_providers = []
+    if openai_key:
+        available_providers.append("openai")
     if xai_key:
         available_providers.append("xai")
     if google_key:
@@ -48,6 +51,16 @@ with st.sidebar:
         available_providers,
         help="Select the LLM provider for analysis"
     )
+    
+    # Model selection based on provider
+    if llm_provider == "openai":
+        model = st.selectbox(
+            "Model",
+            ["gpt-4.1-mini", "gpt-4.1-nano", "gemini-2.5-flash"],
+            help="Select the OpenAI model"
+        )
+    else:
+        model = None
     
     # Analysis type
     analysis_type = st.selectbox(
@@ -131,7 +144,7 @@ with tab1:
             transcript = f.read()
         
         # Initialize clients
-        llm_client = LLMClient(provider=llm_provider)
+        llm_client = LLMClient(provider=llm_provider, model=model if llm_provider == "openai" else None)
         correlator = DataCorrelator()
         
         # Get financial context if requested

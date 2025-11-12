@@ -51,7 +51,7 @@ cp .env.sample .env
 Required API keys:
 - `XAI_API_KEY` - XAI API key
 - `GOOGLE_API_KEY` - Google Gemini API key
-- `FMP_API_KEY` - Financial Modeling Prep API key
+- `API_NINJAS_KEY` - API Ninjas API key
 
 5. **Run the application:**
 ```bash
@@ -95,7 +95,7 @@ git push -u origin main
 ```toml
 XAI_API_KEY = "your-xai-api-key"
 GOOGLE_API_KEY = "your-google-api-key"
-FMP_API_KEY = "your-fmp-api-key"
+API_NINJAS_KEY = "your-fmp-api-key"
 ```
 
 4. **Access your app:**
@@ -170,7 +170,7 @@ services:
     environment:
       - XAI_API_KEY=${XAI_API_KEY}
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
-      - FMP_API_KEY=${FMP_API_KEY}
+      - API_NINJAS_KEY=${API_NINJAS_KEY}
     volumes:
       - ./transcripts:/app/transcripts
       - ./test-results:/app/test-results
@@ -187,7 +187,7 @@ docker build -t earnings-call-analyzer .
 docker run -p 8501:8501 \
   -e XAI_API_KEY="your-key" \
   -e GOOGLE_API_KEY="your-key" \
-  -e FMP_API_KEY="your-key" \
+  -e API_NINJAS_KEY="your-key" \
   earnings-call-analyzer
 
 # Or use docker-compose
@@ -311,7 +311,7 @@ docker push YOUR_ECR_URI:latest
       "environment": [
         {"name": "XAI_API_KEY", "value": "your-key"},
         {"name": "GOOGLE_API_KEY", "value": "your-key"},
-        {"name": "FMP_API_KEY", "value": "your-key"}
+        {"name": "API_NINJAS_KEY", "value": "your-key"}
       ]
     }
   ]
@@ -330,7 +330,7 @@ docker push YOUR_ECR_URI:latest
 |----------|-------------|--------------|
 | `XAI_API_KEY` | XAI API key for LLM access | [XAI Platform](https://x.ai) |
 | `GOOGLE_API_KEY` | Google Gemini API key | [Google AI Studio](https://makersuite.google.com/app/apikey) |
-| `FMP_API_KEY` | Financial Modeling Prep API key | [FMP Dashboard](https://site.financialmodelingprep.com/developer/docs) |
+| `API_NINJAS_KEY` | API Ninjas API key | [API Ninjas Dashboard](https://api-ninjas.com/register) |
 
 ### Optional Variables
 
@@ -346,14 +346,14 @@ docker push YOUR_ECR_URI:latest
 ```bash
 export XAI_API_KEY="your-key"
 export GOOGLE_API_KEY="your-key"
-export FMP_API_KEY="your-key"
+export API_NINJAS_KEY="your-key"
 ```
 
 **Windows:**
 ```cmd
 set XAI_API_KEY=your-key
 set GOOGLE_API_KEY=your-key
-set FMP_API_KEY=your-key
+set API_NINJAS_KEY=your-key
 ```
 
 **Docker:**

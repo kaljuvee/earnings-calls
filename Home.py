@@ -69,8 +69,8 @@ with col1:
     st.markdown("""
     <div class="feature-box">
         <h3>🔍 Download Transcripts</h3>
-        <p>Search and download earnings call transcripts from Financial Modeling Prep API. 
-        Access transcripts for any publicly traded company by ticker symbol and quarter.</p>
+        <p>Search and download earnings call transcripts from API Ninjas (S&P 100 free tier). 
+        Access recent earnings calls for major publicly traded companies.</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -134,11 +134,11 @@ with col2:
         st.error("❌ Google API Key Missing")
 
 with col3:
-    fmp_key = os.getenv("FMP_API_KEY")
-    if fmp_key:
-        st.success("✅ FMP API Key Configured")
+    api_ninjas_key = os.getenv("API_NINJAS_KEY")
+    if api_ninjas_key and 'placeholder' not in api_ninjas_key.lower():
+        st.success("✅ API Ninjas Key Configured")
     else:
-        st.error("❌ FMP API Key Missing")
+        st.warning("⚠️ API Ninjas Key Missing")
 
 # Check transcript directory
 transcript_dir = "transcripts"
@@ -157,8 +157,9 @@ with st.sidebar:
     st.header("📚 About")
     st.markdown("""
     This application uses:
-    - **Financial Modeling Prep API** for transcripts
-    - **Yahoo Finance** for financial data
+    - **API Ninjas** for earnings transcripts
+    - **Finnhub** for financial data (optional)
+    - **Yahoo Finance** for earnings estimates
     - **XAI & Gemini** for AI analysis
     - **LangChain & LangGraph** for agentic workflows
     """)
@@ -168,7 +169,8 @@ with st.sidebar:
     st.header("🔗 Quick Links")
     st.markdown("""
     - [GitHub Repository](https://github.com/kaljuvee/earnings-calls)
-    - [FMP API Docs](https://site.financialmodelingprep.com/developer/docs)
+    - [API Ninjas](https://api-ninjas.com/api/earningscalltranscript)
+    - [Finnhub](https://finnhub.io/)
     - [Yahoo Finance](https://finance.yahoo.com)
     """)
     

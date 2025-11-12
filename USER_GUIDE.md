@@ -27,7 +27,7 @@ The **Earnings Call Analyzer** is a comprehensive Streamlit-based application th
 - API Keys configured in `.env` file:
   - `XAI_API_KEY` - For XAI LLM access
   - `GOOGLE_API_KEY` - For Gemini LLM access
-  - `FMP_API_KEY` - For Financial Modeling Prep API
+  - `API_NINJAS_KEY` - For API Ninjas
 
 ### Installation
 
@@ -59,7 +59,7 @@ The home page provides an overview of the application and displays:
 
 ### Features Overview
 
-- **🔍 Download Transcripts** - Access earnings call transcripts from FMP API
+- **🔍 Download Transcripts** - Access earnings call transcripts from API Ninjas
 - **🤖 AI-Powered Analysis** - Automated analysis using XAI and Gemini
 - **📈 Financial Correlation** - Compare estimates vs actual results
 - **🎯 Predictive Signals** - Generate predictive scores
@@ -85,7 +85,7 @@ Use the sidebar to navigate between pages:
 
 ![Download Transcripts](screenshot_01_download_page.webp)
 
-This page allows you to search and download earnings call transcripts from the Financial Modeling Prep API.
+This page allows you to search and download earnings call transcripts from the API Ninjas.
 
 ### Features
 
@@ -425,7 +425,7 @@ This page allows you to browse, search, and compare all analysis results.
 1. **Check Availability** - Not all quarters may have transcripts available
 2. **Recent Quarters** - Focus on Q3 and Q4 2024 for best availability
 3. **Bulk Download** - Use for sector analysis or portfolio screening
-4. **API Limits** - FMP free tier has 250 calls/day limit
+4. **API Limits** - API Ninjas free tier has 10,000 calls/month limit
 
 ### Running Analysis
 
@@ -476,7 +476,7 @@ This page allows you to browse, search, and compare all analysis results.
 - Solution: Check `.env` file has correct API keys
 - Restart Streamlit after updating `.env`
 
-**Issue: "403 Forbidden" from FMP API**
+**Issue: "403 Forbidden" from API Ninjas**
 - Solution: Check API key validity
 - Verify you haven't exceeded daily rate limit (250 calls/day)
 - Try again after some time
@@ -508,7 +508,7 @@ This page allows you to browse, search, and compare all analysis results.
 - **GitHub Issues**: [https://github.com/kaljuvee/earnings-calls/issues](https://github.com/kaljuvee/earnings-calls/issues)
 - **Documentation**: Check README.md in the repository
 - **API Documentation**:
-  - [FMP API Docs](https://site.financialmodelingprep.com/developer/docs)
+  - [API Ninjas Docs](https://site.financialmodelingprep.com/developer/docs)
   - [Yahoo Finance](https://finance.yahoo.com)
 
 ---
@@ -554,7 +554,7 @@ python test_yfinance_client.py
 The Earnings Call Analyzer provides a comprehensive toolkit for analyzing earnings calls with AI-powered insights. By combining transcript analysis, financial data correlation, and predictive signals, it helps identify potential market opportunities and risks.
 
 **Key Takeaways:**
-- Download transcripts from FMP API
+- Download transcripts from API Ninjas
 - Run AI-powered analysis with structured output
 - Correlate with financial data from Yahoo Finance
 - Track results and compare over time

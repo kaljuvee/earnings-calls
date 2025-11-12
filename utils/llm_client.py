@@ -30,17 +30,24 @@ class AnalysisState(TypedDict):
 class LLMClient:
     """Client for LLM-powered analysis using LangChain"""
     
-    def __init__(self, provider: str = "xai", model: str = None):
+    def __init__(self, provider: str = "openai", model: str = None):
         """
         Initialize LLM client
         
         Args:
-            provider: 'xai' or 'gemini'
+            provider: 'openai', 'xai', or 'gemini'
             model: Specific model name (optional)
         """
         self.provider = provider
         
-        if provider == "xai":
+        if provider == "openai":
+            # Use OpenAI models (gpt-4.1-mini, gpt-4.1-nano, gemini-2.5-flash)
+            # API key and base URL are pre-configured in environment
+            self.llm = ChatOpenAI(
+                model=model or "gpt-4.1-mini",
+                temperature=0.7
+            )
+        elif provider == "xai":
             # XAI uses OpenAI-compatible API
             self.llm = ChatOpenAI(
                 model=model or "grok-beta",
@@ -76,8 +83,11 @@ class LLMClient:
         """
         from prompts.analysis_prompt import ANALYSIS_TEMPLATE
         
+        # Calculate previous year for YoY comparisons
+        prev_year = year - 1
+        
         prompt = PromptTemplate(
-            input_variables=["ticker", "quarter", "year", "company_name", 
+            input_variables=["ticker", "quarter", "year", "prev_year", "company_name", 
                            "transcript", "financial_context"],
             template=ANALYSIS_TEMPLATE
         )
@@ -88,6 +98,7 @@ class LLMClient:
             "ticker": ticker,
             "quarter": quarter,
             "year": year,
+            "prev_year": prev_year,
             "company_name": company_name,
             "transcript": transcript[:50000],  # Limit to avoid token limits
             "financial_context": financial_context

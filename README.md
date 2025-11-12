@@ -4,7 +4,7 @@ A Streamlit-based MVP application that analyzes publicly available earnings call
 
 ## Features
 
-- **Transcript Download**: Fetch earnings call transcripts from Financial Modeling Prep API
+- **Transcript Download**: Fetch earnings call transcripts from API Ninjas (S&P 100 free tier)
 - **LLM Analysis**: Automated analysis using XAI and Gemini via LangChain
 - **Financial Correlation**: Compare analyst estimates vs actual results using Yahoo Finance
 - **Structured Analysis**: Bull/Bear case analysis, verdict, themes, and key questions
@@ -21,9 +21,10 @@ earnings-calls/
 │   ├── 2_Financial_Correlation.py
 │   └── 3_View_Results.py
 ├── utils/                  # Utility modules
-│   ├── fmp_client.py      # FMP API client
-│   ├── llm_client.py      # LLM integration
-│   └── yfinance_client.py # Yahoo Finance integration
+│   ├── api_ninjas_client.py  # API Ninjas client
+│   ├── finnhub_client.py     # Finnhub client
+│   ├── llm_client.py         # LLM integration
+│   └── yfinance_client.py    # Yahoo Finance integration
 ├── prompts/               # LLM prompts
 │   └── analysis_prompt.py
 ├── transcripts/           # Downloaded transcripts
@@ -59,7 +60,8 @@ streamlit run Home.py
 
 - **XAI_API_KEY**: For XAI LLM access
 - **GOOGLE_API_KEY**: For Gemini LLM access
-- **FMP_API_KEY**: For Financial Modeling Prep API (250 calls/day free tier)
+- **API_NINJAS_KEY**: For API Ninjas earnings transcripts (10,000 calls/month free tier)
+- **FINNHUB_API_KEY**: (Optional) For Finnhub financial data
 
 ## Usage
 
@@ -73,7 +75,7 @@ streamlit run Home.py
 - **Frontend**: Streamlit
 - **LLM**: XAI (default), Gemini via LangChain
 - **Agentic Flow**: LangGraph
-- **Financial APIs**: Yahoo Finance, Financial Modeling Prep
+- **Financial APIs**: API Ninjas, Yahoo Finance, Finnhub (optional)
 
 ## License
 
