@@ -49,8 +49,10 @@ class LLMClient:
             )
         elif provider == "xai":
             # XAI uses OpenAI-compatible API
+            # Use GROK_MODEL env var if set, otherwise use provided model, otherwise default to grok-3
+            grok_model = model or os.getenv("GROK_MODEL") or "grok-3"
             self.llm = ChatOpenAI(
-                model=model or "grok-beta",
+                model=grok_model,
                 api_key=os.getenv("XAI_API_KEY"),
                 base_url="https://api.x.ai/v1",
                 temperature=0.7

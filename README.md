@@ -59,6 +59,7 @@ streamlit run Home.py
 ## API Keys Required
 
 - **XAI_API_KEY**: For XAI LLM access
+- **GROK_MODEL**: (Optional) Grok model to use, defaults to `grok-3`
 - **GOOGLE_API_KEY**: For Gemini LLM access
 - **API_NINJAS_KEY**: For API Ninjas earnings transcripts (10,000 calls/month free tier)
 - **FINNHUB_API_KEY**: (Optional) For Finnhub financial data
