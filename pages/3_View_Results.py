@@ -59,7 +59,7 @@ tab1, tab2, tab3 = st.tabs(["📁 Browse Results", "📊 Results Dashboard", "�
 with tab1:
     st.header("Browse Analysis Results")
     
-    results_dir = "test-results"
+    results_dir = "analyses"
     
     if not os.path.exists(results_dir):
         st.warning("⚠️ Results directory not found. Run some analyses first!")
@@ -178,6 +178,30 @@ with tab1:
             
             # Show metadata if available
             if 'ticker' in data:
+                # Display score prominently if available
+                if 'score' in data and data['score'] is not None:
+                    from utils.score_extractor import get_score_label, get_expected_movement_range
+                    score = data['score']
+                    
+                    st.markdown("### 📊 Analysis Score")
+                    col1, col2, col3 = st.columns(3)
+                    
+                    with col1:
+                        st.metric("Score", f"{score}/5", delta=get_score_label(score))
+                    
+                    with col2:
+                        st.metric("Expected Movement", get_expected_movement_range(score))
+                    
+                    with col3:
+                        st.metric("Analysis Type", data.get('analysis_type', 'N/A'))
+                    
+                    if 'score_justification' in data and data['score_justification']:
+                        with st.expander("📝 View Score Justification"):
+                            st.write(data['score_justification'])
+                    
+                    st.markdown("---")
+                
+                # Show other metadata
                 col1, col2, col3, col4 = st.columns(4)
                 
                 with col1:
@@ -195,17 +219,16 @@ with tab1:
             st.markdown("---")
             
             # Display results
-            if 'results' in data:
+            if 'analysis_markdown' in data:
+                # Display the full markdown analysis
+                st.markdown(data['analysis_markdown'])
+            elif 'results' in data:
+                # For agentic workflow results
                 results = data['results']
                 
                 if 'main_analysis' in results:
                     st.markdown("## 📊 Main Analysis")
                     st.markdown(results['main_analysis'])
-                
-                if 'sentiment_analysis' in results:
-                    st.markdown("---")
-                    st.markdown("## 😊 Sentiment Analysis")
-                    st.markdown(results['sentiment_analysis'])
                 
                 if 'predictive_signals' in results:
                     st.markdown("---")
@@ -219,6 +242,31 @@ with tab1:
                 content = f.read()
             
             st.subheader(f"📄 {selected_file}")
+            
+            # Extract and display score if present
+            from utils.score_extractor import extract_score_from_analysis, get_score_label, get_expected_movement_range
+            score, justification = extract_score_from_analysis(content)
+            
+            if score is not None:
+                st.markdown("### 📊 Analysis Score")
+                col1, col2, col3 = st.columns(3)
+                
+                with col1:
+                    st.metric("Score", f"{score}/5", delta=get_score_label(score))
+                
+                with col2:
+                    st.metric("Expected Movement", get_expected_movement_range(score))
+                
+                with col3:
+                    # Parse filename for metadata
+                    parts = selected_file.replace('.md', '').split('_')
+                    ticker = parts[0] if len(parts) > 0 else 'N/A'
+                    st.metric("Ticker", ticker)
+                
+                if justification:
+                    with st.expander("📝 View Score Justification"):
+                        st.write(justification)
+            
             st.markdown("---")
             st.markdown(content)
 
