@@ -5,51 +5,5 @@ Collecting usage statistics. To deactivate, set browser.gatherUsageStats to fals
 
   You can now view your Streamlit app in your browser.
 
-  Local URL: http://localhost:8501
-  Network URL: http://169.254.0.21:8501
-  External URL: http://44.202.182.96:8501
+  URL: http://0.0.0.0:8501
 
-2025-11-12 07:43:07.003 Uncaught app execution
-Traceback (most recent call last):
-  File "/usr/local/lib/python3.11/dist-packages/streamlit/runtime/scriptrunner/exec_code.py", line 129, in exec_func_with_error_handling
-    result = func()
-             ^^^^^^
-  File "/usr/local/lib/python3.11/dist-packages/streamlit/runtime/scriptrunner/script_runner.py", line 667, in code_to_exec
-    _mpa_v1(self._main_script_path)
-  File "/usr/local/lib/python3.11/dist-packages/streamlit/runtime/scriptrunner/script_runner.py", line 165, in _mpa_v1
-    page.run()
-  File "/usr/local/lib/python3.11/dist-packages/streamlit/navigation/page.py", line 303, in run
-    exec(code, module.__dict__)  # noqa: S102
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/ubuntu/earnings-calls/pages/1_Analyze_Transcripts.py", line 9, in <module>
-    from utils.llm_client import LLMClient
-  File "/home/ubuntu/earnings-calls/utils/llm_client.py", line 10, in <module>
-    from langchain.prompts import PromptTemplate
-ModuleNotFoundError: No module named 'langchain.prompts'
-2025-11-12 07:43:32.092 Uncaught app execution
-Traceback (most recent call last):
-  File "/usr/local/lib/python3.11/dist-packages/streamlit/runtime/scriptrunner/exec_code.py", line 129, in exec_func_with_error_handling
-    result = func()
-             ^^^^^^
-  File "/usr/local/lib/python3.11/dist-packages/streamlit/runtime/scriptrunner/script_runner.py", line 667, in code_to_exec
-    _mpa_v1(self._main_script_path)
-  File "/usr/local/lib/python3.11/dist-packages/streamlit/runtime/scriptrunner/script_runner.py", line 165, in _mpa_v1
-    page.run()
-  File "/usr/local/lib/python3.11/dist-packages/streamlit/navigation/page.py", line 303, in run
-    exec(code, module.__dict__)  # noqa: S102
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/ubuntu/earnings-calls/pages/1_Analyze_Transcripts.py", line 9, in <module>
-    from utils.llm_client import LLMClient
-  File "/home/ubuntu/earnings-calls/utils/llm_client.py", line 11, in <module>
-    from langgraph.graph import Graph, StateGraph
-ImportError: cannot import name 'Graph' from 'langgraph.graph' (/usr/local/lib/python3.11/dist-packages/langgraph/graph/__init__.py)
-2025-11-12 07:44:32.997 Please replace `use_container_width` with `width`.
-
-`use_container_width` will be removed after 2025-12-31.
-
-For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
-2025-11-12 07:44:33.564 Please replace `use_container_width` with `width`.
-
-`use_container_width` will be removed after 2025-12-31.
-
-For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
