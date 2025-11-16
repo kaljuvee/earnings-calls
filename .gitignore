@@ -49,3 +49,12 @@ analyses/
 
 # Database files
 data/
+
+# Test outputs
+tests/__pycache__/
+tests/*.pyc
+
+# Task outputs
+tasks/__pycache__/
+tasks/*.pyc
+tasks/logs/
