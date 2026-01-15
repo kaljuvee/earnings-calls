@@ -1,13 +1,19 @@
 """
 LLM Client for Earnings Call Analysis
-Integrates XAI and Gemini via LangChain
+Generic LangChain integration supporting multiple providers:
+- OpenAI (GPT-4, GPT-3.5)
+- Anthropic (Claude)
+- XAI (Grok)
+- Google (Gemini)
+- Groq (LLaMA)
+- Together AI
+- OpenRouter
 """
 
 import os
 from typing import Optional, Dict, List
-from langchain_openai import ChatOpenAI
-from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import PromptTemplate
+from langchain_core.language_models import BaseLLM
 from langgraph.graph import StateGraph
 from typing_extensions import TypedDict
 
@@ -28,43 +34,104 @@ class AnalysisState(TypedDict):
 
 
 class LLMClient:
-    """Client for LLM-powered analysis using LangChain"""
+    """Generic LLM Client supporting multiple providers via LangChain"""
     
-    def __init__(self, provider: str = "openai", model: str = None):
+    SUPPORTED_PROVIDERS = {
+        "openai": "OpenAI (GPT-4, GPT-3.5)",
+        "anthropic": "Anthropic (Claude)",
+        "xai": "XAI (Grok)",
+        "gemini": "Google (Gemini)",
+        "groq": "Groq (LLaMA)",
+        "together_ai": "Together AI",
+        "openrouter": "OpenRouter"
+    }
+    
+    def __init__(self, provider: str = "openai", model: str = None, api_key: str = None):
         """
-        Initialize LLM client
+        Initialize LLM client with generic provider support
         
         Args:
-            provider: 'openai', 'xai', or 'gemini'
+            provider: LLM provider ('openai', 'anthropic', 'xai', 'gemini', 'groq', 'together_ai', 'openrouter')
             model: Specific model name (optional)
+            api_key: API key for the provider (optional, will use env vars if not provided)
         """
-        self.provider = provider
+        self.provider = provider.lower()
+        self.model = model
+        self.api_key = api_key
         
-        if provider == "openai":
-            # Use OpenAI models (gpt-4.1-mini, gpt-4.1-nano, gemini-2.5-flash)
-            # API key and base URL are pre-configured in environment
-            self.llm = ChatOpenAI(
-                model=model or "gpt-4.1-mini",
+        if self.provider not in self.SUPPORTED_PROVIDERS:
+            raise ValueError(f"Unsupported provider: {provider}. Supported: {list(self.SUPPORTED_PROVIDERS.keys())}")
+        
+        self.llm = self._initialize_llm()
+    
+    def _initialize_llm(self) -> BaseLLM:
+        """Initialize LLM based on provider"""
+        
+        if self.provider == "openai":
+            from langchain_openai import ChatOpenAI
+            return ChatOpenAI(
+                model=self.model or "gpt-4-turbo",
+                api_key=self.api_key or os.getenv("OPENAI_API_KEY"),
                 temperature=0.7
             )
-        elif provider == "xai":
+        
+        elif self.provider == "anthropic":
+            from langchain_anthropic import ChatAnthropic
+            return ChatAnthropic(
+                model=self.model or "claude-3-sonnet-20240229",
+                api_key=self.api_key or os.getenv("ANTHROPIC_API_KEY"),
+                temperature=0.7
+            )
+        
+        elif self.provider == "xai":
+            from langchain_openai import ChatOpenAI
             # XAI uses OpenAI-compatible API
-            # Use GROK_MODEL env var if set, otherwise use provided model, otherwise default to grok-3
-            grok_model = model or os.getenv("GROK_MODEL") or "grok-3"
-            self.llm = ChatOpenAI(
+            grok_model = self.model or os.getenv("GROK_MODEL") or "grok-3"
+            return ChatOpenAI(
                 model=grok_model,
-                api_key=os.getenv("XAI_API_KEY"),
+                api_key=self.api_key or os.getenv("XAI_API_KEY"),
                 base_url="https://api.x.ai/v1",
                 temperature=0.7
             )
-        elif provider == "gemini":
-            self.llm = ChatGoogleGenerativeAI(
-                model=model or "gemini-pro",
-                google_api_key=os.getenv("GOOGLE_API_KEY"),
+        
+        elif self.provider == "gemini":
+            from langchain_google_genai import ChatGoogleGenerativeAI
+            return ChatGoogleGenerativeAI(
+                model=self.model or "gemini-pro",
+                google_api_key=self.api_key or os.getenv("GOOGLE_API_KEY"),
                 temperature=0.7
             )
+        
+        elif self.provider == "groq":
+            from langchain_groq import ChatGroq
+            return ChatGroq(
+                model=self.model or "mixtral-8x7b-32768",
+                api_key=self.api_key or os.getenv("GROQ_API_KEY"),
+                temperature=0.7
+            )
+        
+        elif self.provider == "together_ai":
+            from langchain_openai import ChatOpenAI
+            # Together AI uses OpenAI-compatible API
+            return ChatOpenAI(
+                model=self.model or "meta-llama/Llama-2-70b-chat-hf",
+                api_key=self.api_key or os.getenv("TOGETHER_AI_API_KEY"),
+                base_url="https://api.together.xyz/v1",
+                temperature=0.7
+            )
+        
+        elif self.provider == "openrouter":
+            from langchain_openai import ChatOpenAI
+            # OpenRouter uses OpenAI-compatible API
+            return ChatOpenAI(
+                model=self.model or "openai/gpt-3.5-turbo",
+                api_key=self.api_key or os.getenv("OPENROUTER_API_KEY"),
+                base_url="https://openrouter.io/api/v1",
+                temperature=0.7
+            )
+        
         else:
-            raise ValueError(f"Unknown provider: {provider}")
+            raise ValueError(f"Unknown provider: {self.provider}")
     
     def analyze_transcript(self, ticker: str, quarter: int, year: int,
                           transcript: str, company_name: str = "",
@@ -108,7 +175,38 @@ class LLMClient:
         
         return result.content
     
+    def analyze_sentiment(self, transcript: str) -> str:
+        """
+        Analyze sentiment of the transcript
+        
+        Args:
+            transcript: Transcript text
+            
+        Returns:
+            Sentiment analysis
+        """
+        sentiment_prompt = PromptTemplate(
+            input_variables=["transcript"],
+            template="""Analyze the sentiment of the following earnings call transcript. 
+Provide a detailed sentiment analysis including:
+1. Overall sentiment (Positive/Negative/Neutral)
+2. Key positive themes
+3. Key negative themes
+4. Management tone and confidence level
 
+Transcript:
+{transcript}
+
+Provide a concise but comprehensive sentiment analysis."""
+        )
+        
+        chain = sentiment_prompt | self.llm
+        
+        result = chain.invoke({
+            "transcript": transcript[:20000]  # Limit for sentiment analysis
+        })
+        
+        return result.content
     
     def compare_estimates_vs_actual(self, ticker: str, quarter: int, year: int,
                                    estimates: str, actual_results: str) -> str:
@@ -221,7 +319,7 @@ class LLMClient:
         def compile_report_node(state: AnalysisState) -> AnalysisState:
             """Compile final report"""
             report = f"""# Earnings Call Analysis Report
-            
+
 {state["main_analysis"]}
 
 ---

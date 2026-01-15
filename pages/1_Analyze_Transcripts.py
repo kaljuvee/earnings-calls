@@ -24,45 +24,83 @@ st.set_page_config(
 st.title("🤖 Analyze Earnings Call Transcripts")
 st.markdown("AI-powered analysis using LangChain and LangGraph")
 
-# Check API keys
-openai_key = os.getenv("OPENAI_API_KEY")
-xai_key = os.getenv("XAI_API_KEY")
-google_key = os.getenv("GOOGLE_API_KEY")
-
-if not openai_key and not xai_key and not google_key:
-    st.error("❌ No LLM API keys configured. Please set OPENAI_API_KEY, XAI_API_KEY, or GOOGLE_API_KEY in .env file")
-    st.stop()
-
 # Sidebar settings
 with st.sidebar:
     st.header("⚙️ Analysis Settings")
     
-    # LLM provider selection
-    available_providers = []
-    if openai_key:
-        available_providers.append("openai")
-    if xai_key:
-        available_providers.append("xai")
-    if google_key:
-        available_providers.append("gemini")
+    # LLM Provider selection with all supported providers
+    provider_options = {
+        "openai": "🔵 OpenAI (GPT-4, GPT-3.5)",
+        "anthropic": "🟠 Anthropic (Claude)",
+        "xai": "⚫ XAI (Grok)",
+        "gemini": "🔴 Google (Gemini)",
+        "groq": "🟣 Groq (LLaMA)",
+        "together_ai": "🟢 Together AI",
+        "openrouter": "🟡 OpenRouter"
+    }
     
     llm_provider = st.selectbox(
         "LLM Provider",
-        available_providers,
+        options=list(provider_options.keys()),
+        format_func=lambda x: provider_options[x],
         help="Select the LLM provider for analysis"
     )
     
+    # API Key input field
+    st.markdown("---")
+    st.subheader("🔑 API Configuration")
+    
+    # Map provider to environment variable names
+    env_var_map = {
+        "openai": "OPENAI_API_KEY",
+        "anthropic": "ANTHROPIC_API_KEY",
+        "xai": "XAI_API_KEY",
+        "gemini": "GOOGLE_API_KEY",
+        "groq": "GROQ_API_KEY",
+        "together_ai": "TOGETHER_AI_API_KEY",
+        "openrouter": "OPENROUTER_API_KEY"
+    }
+    
+    env_var_name = env_var_map.get(llm_provider, "")
+    default_api_key = os.getenv(env_var_name, "")
+    
+    api_key_input = st.text_input(
+        f"API Key ({llm_provider.upper()})",
+        value=default_api_key,
+        type="password",
+        help=f"Enter your {llm_provider.upper()} API key. If left empty, will use environment variable {env_var_name}"
+    )
+    
+    # Use provided API key or fall back to environment variable
+    api_key = api_key_input if api_key_input else default_api_key
+    
+    if not api_key:
+        st.warning(f"⚠️ No API key provided for {llm_provider.upper()}. Please enter one above or set {env_var_name} environment variable.")
+    
     # Model selection based on provider
-    if llm_provider == "openai":
-        model = st.selectbox(
-            "Model",
-            ["gpt-4.1-mini", "gpt-4.1-nano", "gemini-2.5-flash"],
-            help="Select the OpenAI model"
-        )
-    else:
-        model = None
+    st.markdown("---")
+    st.subheader("🤖 Model Selection")
+    
+    model_options = {
+        "openai": ["gpt-4-turbo", "gpt-4", "gpt-3.5-turbo"],
+        "anthropic": ["claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307"],
+        "xai": ["grok-3", "grok-2", "grok-1"],
+        "gemini": ["gemini-pro", "gemini-1.5-pro", "gemini-1.5-flash"],
+        "groq": ["mixtral-8x7b-32768", "llama2-70b-4096", "llama-3-70b-8192"],
+        "together_ai": ["meta-llama/Llama-2-70b-chat-hf", "meta-llama/Llama-3-70b-chat-hf", "mistralai/Mixtral-8x7B-Instruct-v0.1"],
+        "openrouter": ["openai/gpt-4-turbo", "anthropic/claude-3-opus", "meta-llama/llama-3-70b-instruct"]
+    }
+    
+    available_models = model_options.get(llm_provider, ["default"])
+    
+    model = st.selectbox(
+        "Model",
+        available_models,
+        help=f"Select the {llm_provider.upper()} model to use"
+    )
     
     # Analysis type
+    st.markdown("---")
     analysis_type = st.selectbox(
         "Analysis Type",
         ["Standard Analysis", "Agentic Workflow", "Quick Summary"],
@@ -137,14 +175,23 @@ with tab1:
         analyze_button = st.button("🚀 Run Analysis", type="primary", use_container_width=True)
     
     if analyze_button:
+        # Validate API key
+        if not api_key:
+            st.error(f"❌ Please provide an API key for {llm_provider.upper()}")
+            st.stop()
+        
         # Read full transcript
         file_path = os.path.join(transcript_dir, selected_file)
         with open(file_path, 'r', encoding='utf-8') as f:
             transcript = f.read()
         
         # Initialize clients
-        llm_client = LLMClient(provider=llm_provider, model=model if llm_provider == "openai" else None)
-        correlator = DataCorrelator()
+        try:
+            llm_client = LLMClient(provider=llm_provider, model=model, api_key=api_key)
+            correlator = DataCorrelator()
+        except Exception as e:
+            st.error(f"❌ Failed to initialize LLM client: {str(e)}")
+            st.stop()
         
         # Get financial context if requested
         financial_context = ""
@@ -211,7 +258,7 @@ with tab1:
                         'company_name': ticker,
                         'timestamp': timestamp,
                         'provider': llm_provider,
-                        'model': model if llm_provider == "openai" else None,
+                        'model': model,
                         'analysis_type': 'Agentic Workflow',
                         'results': results,
                         'full_report_markdown': full_report,
@@ -267,68 +314,62 @@ with tab1:
                     from utils.score_extractor import extract_score_from_analysis, get_score_label, get_expected_movement_range
                     score, score_justification = extract_score_from_analysis(analysis)
                     
-                    # Display score prominently
-                    if score is not None:
-                        col1, col2, col3 = st.columns(3)
-                        with col1:
-                            st.metric("Score", f"{score}/5", delta=get_score_label(score))
-                        with col2:
-                            st.metric("Expected Movement", get_expected_movement_range(score))
-                        with col3:
-                            # Save to database
-                            from utils.db_util import DatabaseUtil
-                            from datetime import date
-                            db = DatabaseUtil()
-                            try:
-                                # Use current date as earnings date (should be updated with actual date)
-                                earnings_date = date.today()
-                                db.insert_score(
-                                    ticker=ticker,
-                                    quarter=quarter,
-                                    year=year,
-                                    earnings_date=earnings_date,
-                                    score=score,
-                                    score_justification=score_justification or "No justification provided",
-                                    provider=llm_provider,
-                                    model=model if llm_provider == "openai" else None,
-                                    analysis_type="Standard Analysis"
-                                )
-                                st.success("💾 Saved to DB")
-                            except Exception as e:
-                                st.warning(f"⚠️ DB save failed: {str(e)}")
-                    
-                    st.markdown("---")
+                    # Display analysis
+                    st.markdown("## 📊 Analysis")
                     st.markdown(analysis)
                     
-                    # Save results in both JSON and MD formats
+                    # Display score
+                    st.markdown("---")
+                    col1, col2, col3 = st.columns(3)
+                    
+                    with col1:
+                        st.metric("Score", f"{score}/5")
+                    
+                    with col2:
+                        label = get_score_label(score)
+                        st.metric("Label", label)
+                    
+                    with col3:
+                        movement_range = get_expected_movement_range(score)
+                        st.metric("Expected Movement", movement_range)
+                    
+                    # Display justification
+                    st.markdown("### Score Justification")
+                    st.markdown(score_justification)
+                    
+                    # Save results
                     analyses_dir = "analyses"
                     os.makedirs(analyses_dir, exist_ok=True)
                     
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    base_filename = f"{ticker}_Q{quarter}_{year}_{timestamp}"
+                    base_filename = f"{ticker}_Q{quarter}_{year}_standard_{timestamp}"
                     
                     # Save as Markdown
                     md_file = f"{base_filename}.md"
                     md_path = os.path.join(analyses_dir, md_file)
                     with open(md_path, 'w', encoding='utf-8') as f:
-                        f.write(analysis)
+                        f.write(f"# Analysis for {ticker} Q{quarter} {year}\n\n")
+                        f.write(f"**Score:** {score}/5 ({get_score_label(score)})\n\n")
+                        f.write(f"**Expected Movement:** {movement_range}\n\n")
+                        f.write(f"## Analysis\n\n{analysis}\n\n")
+                        f.write(f"## Score Justification\n\n{score_justification}\n")
                     
-                    # Save as JSON with metadata
+                    # Save as JSON
                     json_file = f"{base_filename}.json"
                     json_path = os.path.join(analyses_dir, json_file)
                     analysis_data = {
-                        "ticker": ticker,
-                        "quarter": quarter,
-                        "year": year,
-                        "company_name": ticker,
-                        "timestamp": timestamp,
-                        "provider": llm_provider,
-                        "model": model if llm_provider == "openai" else None,
-                        "analysis_type": "Standard Analysis",
-                        "analysis_markdown": analysis,
-                        "financial_context_included": include_financial_context,
-                        "score": score,
-                        "score_justification": score_justification
+                        'ticker': ticker,
+                        'quarter': quarter,
+                        'year': year,
+                        'timestamp': timestamp,
+                        'provider': llm_provider,
+                        'model': model,
+                        'analysis_type': 'Standard Analysis',
+                        'score': score,
+                        'label': get_score_label(score),
+                        'expected_movement': movement_range,
+                        'analysis': analysis,
+                        'score_justification': score_justification
                     }
                     with open(json_path, 'w', encoding='utf-8') as f:
                         json.dump(analysis_data, f, indent=2)
@@ -340,8 +381,8 @@ with tab1:
                     with col1:
                         st.download_button(
                             label="📥 Download Markdown",
-                            data=analysis,
-                            file_name=f"{ticker}_Q{quarter}_{year}_analysis.md",
+                            data=open(md_path, 'r').read(),
+                            file_name=f"{ticker}_Q{quarter}_{year}_report.md",
                             mime="text/markdown",
                             use_container_width=True
                         )
@@ -349,7 +390,7 @@ with tab1:
                         st.download_button(
                             label="📥 Download JSON",
                             data=json.dumps(analysis_data, indent=2),
-                            file_name=f"{ticker}_Q{quarter}_{year}_analysis.json",
+                            file_name=f"{ticker}_Q{quarter}_{year}_report.json",
                             mime="application/json",
                             use_container_width=True
                         )
@@ -362,52 +403,63 @@ with tab2:
     st.header("Batch Analysis")
     st.markdown("Analyze multiple transcripts at once")
     
-    # Get all transcripts
-    if transcript_files:
-        st.info(f"📁 {len(transcript_files)} transcripts available")
-        
-        # Select transcripts for batch processing
+    # Get list of available transcripts
+    transcript_dir = "transcripts"
+    transcript_files = []
+    
+    if os.path.exists(transcript_dir):
+        transcript_files = [f for f in os.listdir(transcript_dir) if f.endswith('.md')]
+    
+    if not transcript_files:
+        st.warning("⚠️ No transcripts available. Please download transcripts first.")
+    else:
+        # Multi-select for transcripts
         selected_transcripts = st.multiselect(
             "Select Transcripts to Analyze",
             transcript_files,
-            help="Choose multiple transcripts for batch analysis"
+            help="Choose multiple transcripts to analyze in batch"
         )
         
-        if selected_transcripts:
-            st.info(f"Selected {len(selected_transcripts)} transcripts")
-            
-            batch_button = st.button("🚀 Run Batch Analysis", type="primary")
-            
-            if batch_button:
+        if st.button("📦 Run Batch Analysis", type="primary", use_container_width=True):
+            if not selected_transcripts:
+                st.warning("Please select at least one transcript")
+            elif not api_key:
+                st.error(f"❌ Please provide an API key for {llm_provider.upper()}")
+            else:
+                # Initialize clients
+                try:
+                    llm_client = LLMClient(provider=llm_provider, model=model, api_key=api_key)
+                    correlator = DataCorrelator()
+                except Exception as e:
+                    st.error(f"❌ Failed to initialize LLM client: {str(e)}")
+                    st.stop()
+                
                 progress_bar = st.progress(0)
                 status_text = st.empty()
-                
-                llm_client = LLMClient(provider=llm_provider)
-                correlator = DataCorrelator()
-                
                 results_summary = []
                 
-                for i, filename in enumerate(selected_transcripts):
-                    status_text.text(f"Analyzing {filename}... ({i+1}/{len(selected_transcripts)})")
+                for i, selected_file in enumerate(selected_transcripts):
+                    status_text.text(f"Processing {selected_file}... ({i+1}/{len(selected_transcripts)})")
                     
-                    # Parse filename
-                    parts = filename.replace('.md', '').split('_')
-                    if len(parts) >= 3:
-                        ticker = parts[0]
-                        quarter = int(parts[1].replace('Q', ''))
-                        year = int(parts[2])
-                        
-                        # Read transcript
-                        file_path = os.path.join(transcript_dir, filename)
-                        with open(file_path, 'r', encoding='utf-8') as f:
-                            transcript = f.read()
-                        
-                        try:
-                            # Run analysis
+                    try:
+                        # Parse filename
+                        parts = selected_file.replace('.md', '').split('_')
+                        if len(parts) >= 3:
+                            ticker = parts[0]
+                            quarter = int(parts[1].replace('Q', ''))
+                            year = int(parts[2])
+                            
+                            # Read transcript
+                            file_path = os.path.join(transcript_dir, selected_file)
+                            with open(file_path, 'r', encoding='utf-8') as f:
+                                transcript = f.read()
+                            
+                            # Get financial context if requested
                             financial_context = ""
                             if include_financial_context:
                                 financial_context = correlator.generate_financial_context(ticker, quarter, year)
                             
+                            # Run analysis
                             analysis = llm_client.analyze_transcript(
                                 ticker=ticker,
                                 quarter=quarter,
@@ -435,50 +487,68 @@ with tab2:
                                 'Status': '✅ Success',
                                 'File': result_file
                             })
-                            
-                        except Exception as e:
-                            results_summary.append({
-                                'Ticker': ticker,
-                                'Quarter': f"Q{quarter}",
-                                'Year': year,
-                                'Status': f'❌ Failed: {str(e)[:50]}',
-                                'File': 'N/A'
-                            })
+                    
+                    except Exception as e:
+                        results_summary.append({
+                            'Ticker': selected_file,
+                            'Quarter': 'N/A',
+                            'Year': 'N/A',
+                            'Status': f'❌ Failed: {str(e)[:50]}',
+                            'File': 'N/A'
+                        })
                     
                     progress_bar.progress((i + 1) / len(selected_transcripts))
                 
                 status_text.text("✅ Batch analysis complete!")
                 
-                # Show results summary
-                import pandas as pd
-                results_df = pd.DataFrame(results_summary)
-                st.dataframe(results_df, use_container_width=True)
-                
-                success_count = sum(1 for r in results_summary if '✅' in r['Status'])
-                st.success(f"Successfully analyzed {success_count}/{len(selected_transcripts)} transcripts")
-    else:
-        st.warning("⚠️ No transcripts available")
+                # Display results
+                st.subheader("Batch Analysis Results")
+                st.dataframe(results_summary, use_container_width=True)
 
 with tab3:
     st.header("View Analysis Results")
     
-    # List saved results
-    results_dir = "test-results"
+    results_dir = "analyses"
     
     if os.path.exists(results_dir):
-        result_files = [f for f in os.listdir(results_dir) if f.endswith(('.md', '.json'))]
+        result_files = [f for f in os.listdir(results_dir) if f.endswith('.md') or f.endswith('.json')]
         
-        if result_files:
-            st.info(f"📁 Found {len(result_files)} analysis results")
+        if not result_files:
+            st.info("No analysis results found")
+        else:
+            st.success(f"Found {len(result_files)} result file(s)")
             
-            selected_result = st.selectbox(
-                "Select Result to View",
-                sorted(result_files, reverse=True)
-            )
+            # Filter by file type
+            file_type = st.selectbox("Filter by file type", ["All", "Markdown (.md)", "JSON (.json)"])
             
-            if st.button("👁️ View Result"):
+            if file_type == "Markdown (.md)":
+                result_files = [f for f in result_files if f.endswith('.md')]
+            elif file_type == "JSON (.json)":
+                result_files = [f for f in result_files if f.endswith('.json')]
+            
+            # Select result to view
+            selected_result = st.selectbox("Select a result to view", result_files)
+            
+            if selected_result:
                 result_path = os.path.join(results_dir, selected_result)
                 
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    st.subheader(selected_result)
+                with col2:
+                    # Download button
+                    with open(result_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                    
+                    st.download_button(
+                        "📥 Download",
+                        content,
+                        file_name=selected_result,
+                        mime="text/markdown" if selected_result.endswith('.md') else "application/json",
+                        use_container_width=True
+                    )
+                
+                # Display content
                 if selected_result.endswith('.json'):
                     with open(result_path, 'r', encoding='utf-8') as f:
                         data = json.load(f)
@@ -489,8 +559,6 @@ with tab3:
                         content = f.read()
                     
                     st.markdown(content)
-        else:
-            st.warning("⚠️ No analysis results found")
     else:
         st.warning("⚠️ Results directory not found")
 
