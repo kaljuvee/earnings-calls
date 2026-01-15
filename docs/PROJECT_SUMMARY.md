@@ -648,7 +648,7 @@ See `DEPLOYMENT.md` for detailed instructions.
 
 **Project Repository:** [https://github.com/kaljuvee/earnings-calls](https://github.com/kaljuvee/earnings-calls)
 
-**Organization:** Lohusalu Capital Management
+**Organization:** Julian Kaljuvee
 
 **Email:** dev@lohusalu.com
 
@@ -688,4 +688,4 @@ The MVP is fully functional with all core features implemented, comprehensive do
 **Date:** November 12, 2025  
 **Status:** MVP Complete
 
-*Lohusalu Capital Management*
+*Julian Kaljuvee*

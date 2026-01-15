@@ -150,7 +150,12 @@ else:
 
 # Footer
 st.markdown("---")
-st.markdown('<div class="company-name">Lohusalu Capital Management</div>', unsafe_allow_html=True)
+st.markdown("""
+<div class="company-name">
+    <p>Built by <a href="https://kaljuvee.github.io" target="_blank"><strong>Julian Kaljuvee</strong></a></p>
+    <p><a href="https://github.com/kaljuvee/earnings-calls" target="_blank">📌 GitHub Repository</a></p>
+</div>
+""", unsafe_allow_html=True)
 
 # Sidebar
 with st.sidebar:

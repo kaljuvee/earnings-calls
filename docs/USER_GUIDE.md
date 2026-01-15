@@ -572,4 +572,4 @@ The Earnings Call Analyzer provides a comprehensive toolkit for analyzing earnin
 
 ---
 
-*Lohusalu Capital Management*
+*Julian Kaljuvee*

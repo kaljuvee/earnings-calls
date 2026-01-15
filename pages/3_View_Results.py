@@ -489,3 +489,11 @@ with tab3:
 # Footer
 st.markdown("---")
 st.markdown("💡 **Tip:** Use the search functionality to find specific themes or keywords across all analyses")
+st.markdown("""
+---
+
+<div style="text-align: center; margin-top: 2rem; color: #888;">
+    <p>Built by <a href="https://kaljuvee.github.io" target="_blank"><strong>Julian Kaljuvee</strong></a></p>
+    <p><a href="https://github.com/kaljuvee/earnings-calls" target="_blank">📌 GitHub Repository</a></p>
+</div>
+""", unsafe_allow_html=True)

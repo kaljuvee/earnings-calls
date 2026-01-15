@@ -564,4 +564,4 @@ For deployment issues:
 
 ---
 
-*Lohusalu Capital Management*
+*Julian Kaljuvee*

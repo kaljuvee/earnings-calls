@@ -307,4 +307,11 @@ st.markdown("""
 - **Finnhub**: Premium feature. Requires paid subscription for transcript access.
 - Transcripts are saved to the `transcripts/` directory in markdown format
 - You can also manually upload transcript files to the `transcripts/` directory
-""")
+
+---
+
+<div style="text-align: center; margin-top: 2rem; color: #888;">
+    <p>Built by <a href="https://kaljuvee.github.io" target="_blank"><strong>Julian Kaljuvee</strong></a></p>
+    <p><a href="https://github.com/kaljuvee/earnings-calls" target="_blank">📌 GitHub Repository</a></p>
+</div>
+""", unsafe_allow_html=True)

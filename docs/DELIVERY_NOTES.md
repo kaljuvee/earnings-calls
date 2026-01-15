@@ -604,7 +604,7 @@ The application is production-ready and can be deployed immediately to Streamlit
 
 ---
 
-*Lohusalu Capital Management*  
+*Julian Kaljuvee*  
 *November 12, 2025*
 
 ---

@@ -269,3 +269,12 @@ elif accuracy > 50:
     st.info(f"📊 **Moderate direction accuracy** ({accuracy:.1f}%). Better than random but room for improvement.")
 else:
     st.warning(f"⚠️ **Low direction accuracy** ({accuracy:.1f}%). Model needs improvement or more data.")
+
+# Footer
+st.markdown("---")
+st.markdown("""
+<div style="text-align: center; margin-top: 2rem; color: #888;">
+    <p>Built by <a href="https://kaljuvee.github.io" target="_blank"><strong>Julian Kaljuvee</strong></a></p>
+    <p><a href="https://github.com/kaljuvee/earnings-calls" target="_blank">📌 GitHub Repository</a></p>
+</div>
+""", unsafe_allow_html=True)

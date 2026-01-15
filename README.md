@@ -199,3 +199,9 @@ Contributions welcome! Please open an issue or submit a pull request.
 For issues or questions:
 - GitHub Issues: https://github.com/kaljuvee/earnings-calls/issues
 - Documentation: See `docs/` directory
+
+## About
+
+Built by [Julian Kaljuvee](https://kaljuvee.github.io)
+
+[📌 GitHub Repository](https://github.com/kaljuvee/earnings-calls)
